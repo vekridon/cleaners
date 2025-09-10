@@ -1,28 +1,35 @@
-// api/bookings.ts
-import { getDb } from "./_lib/db";
-import { bookings } from "../shared/schema";
-import { eq, desc } from "drizzle-orm";
+// (optional) export const config = { runtime: "nodejs" };
+
+import { Pool } from "pg";
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL!,
+  ssl: { rejectUnauthorized: false },
+});
 
 export default async function handler(req: any, res: any) {
-  const db = getDb();
   try {
-    if (req.method === "GET") {
-      const providerId = req.query.providerId as string | undefined;
-      if (providerId) {
-        const list = await db.select().from(bookings).where(eq(bookings.providerId, Number(providerId))).orderBy(desc(bookings.id));
-        return res.status(200).json(list);
-      }
-      const list = await db.select().from(bookings).orderBy(desc(bookings.id));
-      return res.status(200).json(list);
-    }
     if (req.method === "POST") {
-      const body = req.body;
-      const inserted = await db.insert(bookings).values(body).returning();
-      return res.status(201).json(inserted[0]);
+      const { providerId } = req.body ?? {};
+      if (!providerId) return res.status(400).json({ error: "providerId required" });
+
+      const { rows } = await pool.query(
+        "insert into bookings (provider_id) values ($1) returning id::int as id, provider_id::int as providerId, timestamp",
+        [providerId]
+      );
+      return res.status(201).json(rows[0]);
     }
-    return res.status(405).json({ error: "Method not allowed" });
+
+    if (req.method === "GET") {
+      const { rows } = await pool.query(
+        "select id::int as id, provider_id::int as providerId, timestamp from bookings order by id desc limit 50"
+      );
+      return res.status(200).json(rows);
+    }
+
+    res.setHeader("Allow", "GET, POST");
+    res.status(405).end("Method Not Allowed");
   } catch (e: any) {
-    console.error(e);
-    return res.status(500).json({ error: "Internal Server Error", detail: String(e?.message || e) });
+    res.status(500).json({ error: String(e?.message || e) });
   }
 }
