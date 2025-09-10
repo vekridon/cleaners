@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, integer, timestamp, bigint } from "drizzle-orm/pg-core";
+import { pgTable, text, integer, timestamp, bigint } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -12,7 +12,9 @@ export const providers = pgTable("providers", {
 
 export const reviews = pgTable("reviews", {
   id: bigint("id", { mode: "number" }).primaryKey(),
-  providerId: bigint("provider_id", { mode: "number" }).references(() => providers.id).notNull(),
+  providerId: bigint("provider_id", { mode: "number" })
+    .references(() => providers.id)
+    .notNull(),
   customerName: text("customer_name").notNull(),
   customerInitials: text("customer_initials").notNull(),
   rating: integer("rating").notNull(),
@@ -22,13 +24,13 @@ export const reviews = pgTable("reviews", {
 
 export const bookings = pgTable("bookings", {
   id: bigint("id", { mode: "number" }).primaryKey(),
-  providerId: bigint("provider_id", { mode: "number" }).references(() => providers.id).notNull(),
+  providerId: bigint("provider_id", { mode: "number" })
+    .references(() => providers.id)
+    .notNull(),
   timestamp: timestamp("timestamp", { withTimezone: true }).defaultNow().notNull(),
 });
 
-export const insertProviderSchema = createInsertSchema(providers).omit({
-  id: true,
-});
+export const insertProviderSchema = createInsertSchema(providers).omit({ id: true });
 
 export const insertReviewSchema = createInsertSchema(reviews).omit({
   id: true,
@@ -37,7 +39,7 @@ export const insertReviewSchema = createInsertSchema(reviews).omit({
 
 export const insertBookingSchema = createInsertSchema(bookings).omit({
   id: true,
-  createdAt: true,
+  timestamp: true, // ← fixed
 });
 
 export type InsertProvider = z.infer<typeof insertProviderSchema>;
