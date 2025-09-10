@@ -169,7 +169,7 @@ export default function Home() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Card className="p-6">
-          <p className="text-muted-foreground">No providers available</p>
+          <p className="text-muted-foreground">No providers available wahhahahaha</p>
         </Card>
       </div>
     );
