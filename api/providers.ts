@@ -1,22 +1,21 @@
 // api/providers.ts
-import type { VercelRequest, VercelResponse } from '@vercel/node'
-import pg from 'pg'
+export const config = { runtime: "nodejs20.x" };
+import type { VercelRequest, VercelResponse } from "@vercel/node";
+import { Pool } from "pg";
 
-const { Pool } = pg
-
-// Vercel Project Settings → Environment Variables: set DATABASE_URL to your Supabase Postgres URL
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }, // Supabase requires SSL on Vercel
-})
+  connectionString: process.env.DATABASE_URL!,
+  ssl: { rejectUnauthorized: false },
+});
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(_req: VercelRequest, res: VercelResponse) {
   try {
-    // sample query — adjust to your schema/table
-    const { rows } = await pool.query('select * from providers limit 50')
-    res.status(200).json({ providers: rows })
-  } catch (err: any) {
-    console.error(err)
-    res.status(500).json({ error: 'Failed to fetch providers', detail: String(err?.message || err) })
+    const { rows } = await pool.query(
+      "select id::int as id, name, bio, rating from providers order by id desc"
+    );
+    // 👇 return the array itself
+    res.status(200).json(rows);
+  } catch (e: any) {
+    res.status(500).json({ error: String(e?.message || e) });
   }
 }
