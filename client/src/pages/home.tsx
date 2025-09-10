@@ -34,7 +34,7 @@ export default function Home() {
     error: providersError,
   } = useQuery<Provider[]>({
     // bump key to avoid stale cached shape
-    queryKey: ["/api/providers", "v2"],
+    queryKey: ["/api/providers?v=2"],
     // tolerate both shapes: array OR { providers: [...] }
     select: (data: any) =>
       (Array.isArray(data) ? data : data?.providers ?? []).map((p: any) => ({
