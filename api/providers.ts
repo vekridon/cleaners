@@ -1,6 +1,5 @@
 // api/providers.ts
 export const config = { runtime: "nodejs20.x" };
-import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { Pool } from "pg";
 
 const pool = new Pool({
@@ -8,7 +7,7 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false },
 });
 
-export default async function handler(_req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: any, res: any) {
   try {
     const { rows } = await pool.query(
       "select id::int as id, name, bio, rating from providers order by id desc"

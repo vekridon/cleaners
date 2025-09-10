@@ -1,10 +1,9 @@
 // api/bookings.ts
-import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { getDb } from "./_lib/db";
 import { bookings } from "../shared/schema";
 import { eq, desc } from "drizzle-orm";
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: any, res: any) {
   const db = getDb();
   try {
     if (req.method === "GET") {
