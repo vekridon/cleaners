@@ -1,6 +1,13 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
-import { providers, reviews, bookings, type Provider, type Review, type Booking, type InsertProvider, type InsertReview, type InsertBooking } from "@shared/schema";
+import {
+  providers,
+  bookings,
+  type Provider,
+  type Booking,
+  type InsertProvider,
+  type InsertBooking,
+} from "@shared/schema";
 import { eq } from "drizzle-orm";
 import type { IStorage } from "./storage";
 
@@ -10,14 +17,18 @@ if (!process.env.DATABASE_URL) {
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }
+  ssl: { rejectUnauthorized: false },
 });
 
 const db = drizzle(pool);
 
 export class DatabaseStorage implements IStorage {
   async getProvider(id: string): Promise<Provider | undefined> {
-    const result = await db.select().from(providers).where(eq(providers.id, parseInt(id))).limit(1);
+    const result = await db
+      .select()
+      .from(providers)
+      .where(eq(providers.id, parseInt(id)))
+      .limit(1);
     return result[0];
   }
 
@@ -30,22 +41,16 @@ export class DatabaseStorage implements IStorage {
     return result[0];
   }
 
-  async getReviewsByProviderId(providerId: string): Promise<Review[]> {
-    return await db.select().from(reviews).where(eq(reviews.providerId, parseInt(providerId)));
-  }
-
-  async createReview(insertReview: InsertReview): Promise<Review> {
-    const result = await db.insert(reviews).values(insertReview).returning();
-    return result[0];
-  }
-
   async createBooking(insertBooking: InsertBooking): Promise<Booking> {
     const result = await db.insert(bookings).values(insertBooking).returning();
     return result[0];
   }
 
   async getBookingsByProviderId(providerId: string): Promise<Booking[]> {
-    return await db.select().from(bookings).where(eq(bookings.providerId, parseInt(providerId)));
+    return await db
+      .select()
+      .from(bookings)
+      .where(eq(bookings.providerId, parseInt(providerId)));
   }
 }
 
